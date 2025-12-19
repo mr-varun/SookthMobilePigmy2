@@ -1,0 +1,537 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Dashboard - Pigmy Collection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        nav .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white !important;
+        }
+        nav .btn {
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-weight: 500;
+        }
+        .dashboard-header {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .dashboard-header h2 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1.8rem;
+        }
+        .dashboard-header .branch-info {
+            color: #666;
+            font-size: 1rem;
+        }
+        .collection-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .form-control, .form-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .info-display {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .info-display strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+        .info-display span {
+            color: #333;
+            font-weight: 500;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .action-card i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .action-card.primary i { color: #667eea; }
+        .action-card.success i { color: #28a745; }
+        .action-card.warning i { color: #ffc107; }
+        .action-card.danger i { color: #dc3545; }
+        .action-card h5 {
+            font-size: 1rem;
+            margin: 0;
+            color: #333;
+        }
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            z-index: 1000;
+            max-width: 400px;
+            width: 90%;
+        }
+        .popup h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .popup-content p {
+            margin: 10px 0;
+            color: #666;
+        }
+        .popup-content strong {
+            color: #333;
+        }
+        .popup button {
+            margin: 10px 5px;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .popup button:hover {
+            transform: scale(1.05);
+        }
+        #confirmYes {
+            background: #28a745;
+            color: white;
+        }
+        #confirmNo {
+            background: #dc3545;
+            color: white;
+        }
+        .datetime-display {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #667eea;
+        }
+        .select2-container--bootstrap-5 .select2-selection {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 6px 15px;
+            min-height: 48px;
+        }
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            line-height: 32px;
+        }
+        .select2-container--bootstrap-5.select2-container--focus .select2-selection {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .select2-container--bootstrap-5 .select2-dropdown {
+            border: 2px solid #667eea;
+            border-radius: 10px;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 20px;
+            }
+            nav .navbar-brand {
+                font-size: 1.2rem;
+            }
+            nav .btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+            .dashboard-header {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+            .dashboard-header h2 {
+                font-size: 1.3rem;
+            }
+            .dashboard-header .branch-info {
+                font-size: 0.9rem;
+            }
+            .collection-card {
+                padding: 20px 15px;
+            }
+            .form-label {
+                font-size: 0.95rem;
+            }
+            .info-display {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+            .btn-submit {
+                padding: 12px;
+                font-size: 15px;
+            }
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-top: 20px;
+            }
+            .action-card {
+                padding: 15px 10px;
+            }
+            .action-card i {
+                font-size: 2rem;
+            }
+            .action-card h5 {
+                font-size: 0.85rem;
+            }
+            .popup {
+                padding: 20px;
+                max-width: 90%;
+            }
+            .popup h3 {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
+            .popup-content p {
+                font-size: 0.9rem;
+            }
+            .popup button {
+                padding: 8px 20px;
+                font-size: 0.9rem;
+            }
+            .datetime-display {
+                font-size: 0.9rem;
+                padding: 8px 12px;
+            }
+            .select2-container--bootstrap-5 .select2-selection {
+                min-height: 44px;
+                padding: 4px 12px;
+            }
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+        @media (max-width: 480px) {
+            nav .navbar-brand {
+                font-size: 1rem;
+            }
+            nav .btn {
+                padding: 5px 10px;
+                font-size: 0.75rem;
+            }
+            nav .btn i {
+                margin-right: 0 !important;
+            }
+            nav .btn-light span,
+            nav .btn-danger span {
+                display: none;
+            }
+            .dashboard-header h2 {
+                font-size: 1.1rem;
+            }
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-user-tie me-2"></i>
+                <?= htmlspecialchars($agent_name) ?>
+            </a>
+            <div class="d-flex">
+                <a href="<?= url('agent/reports') ?>" class="btn btn-light btn-sm me-2">
+                    <i class="fas fa-chart-bar"></i> <span>Reports</span>
+                </a>
+                <a href="<?= url('agent/logout') ?>" class="btn btn-danger btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h2><i class="fas fa-hand-holding-usd me-2"></i>Pigmy Collection</h2>
+            <p class="branch-info mb-0"><?= htmlspecialchars($branch_name) ?></p>
+        </div>
+
+        <!-- Date Time Display -->
+        <div class="datetime-display">
+            <i class="far fa-clock me-2"></i><span id="datetime"></span>
+        </div>
+
+        <!-- Collection Form -->
+        <div class="collection-card">
+            <form id="pigmyForm" method="POST" action="<?= url('agent/collection/save') ?>">
+                <!-- Select Account -->
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="fas fa-user me-2"></i>Select Account
+                    </label>
+                    <select id="account" name="account" class="form-select" required>
+                        <option value="">-- Select Account --</option>
+                        <?php foreach ($accounts as $row): ?>
+                            <option value="<?= $row['account_number'] ?>" 
+                                    data-name="<?= htmlspecialchars($row['account_name']) ?>" 
+                                    data-balance="<?= $row['account_new_balance'] ?>" 
+                                    data-opening-date="<?= $row['account_opening_date'] ?>">
+                                <?= htmlspecialchars($row['account_name']) ?> - <?= $row['account_number'] ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <!-- Account Details Display -->
+                <div id="account_details" style="display: none;">
+                    <div class="info-display">
+                        <strong>Account Name:</strong> <span id="account_name"></span>
+                    </div>
+                    <div class="info-display">
+                        <strong></strong>Opening Date:</strong> <span id="account_opening_date"></span>
+                    </div>
+                    <div class="info-display">
+                        <strong>Account Number:</strong> <span id="selected_account"></span>
+                    </div>
+                    <div class="info-display">
+                        <strong>Old Balance:</strong> ₹<span id="old_balance"></span>
+                    </div>
+                </div>
+
+                <!-- Credit Amount -->
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="fas fa-rupee-sign me-2"></i>Collection Amount
+                    </label>
+                    <input type="number" id="credit_amount" name="credit_amount" 
+                           class="form-control" min="1" placeholder="Enter amount to collect" required>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="button" id="submitBtn" class="btn-submit">
+                    <i class="fas fa-check-circle me-2"></i>Submit Collection
+                </button>
+            </form>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="<?= url('agent/resend') ?>" class="action-card primary">
+                <i class="fas fa-paper-plane"></i>
+                <h5>Resend Messages</h5>
+            </a>
+            <a href="<?= url('agent/reports/daywise') ?>" class="action-card success">
+                <i class="fas fa-calendar-check"></i>
+                <h5>DCS Report</h5>
+            </a>
+            <a href="<?= url('agent/reports') ?>" class="action-card warning">
+                <i class="fas fa-file-alt"></i>
+                <h5>All Reports</h5>
+            </a>
+            <a href="<?= url('agent/reset-pin') ?>" class="action-card danger">
+                <i class="fas fa-key"></i>
+                <h5>Reset PIN</h5>
+            </a>
+        </div>
+    </div>
+
+    <!-- Confirmation Popup -->
+    <div class="popup-overlay" id="popupOverlay"></div>
+    <div id="confirmationPopup" class="popup">
+        <div class="popup-content">
+            <h3><i class="fas fa-question-circle text-warning"></i> Confirm Transaction</h3>
+            <p><strong>Account:</strong> <span id="popup_account"></span></p>
+            <p><strong>Credit Amount:</strong> ₹<span id="popup_amount"></span></p>
+            <button id="confirmYes"><i class="fas fa-check me-2"></i>Confirm</button>
+            <button id="confirmNo"><i class="fas fa-times me-2"></i>Cancel</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= url('assets/js/security.js') ?>"></script>
+    <script>
+        // Update Date Time
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById("datetime").innerText = 
+                now.toLocaleDateString('en-GB') + ", " + now.toLocaleTimeString('en-US');
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // Initialize Select2
+        $('#account').select2({
+            theme: 'bootstrap-5',
+            placeholder: '-- Select Account --',
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Account Selection
+        $("#account").change(function() {
+            let selectedOption = $(this).find(':selected');
+            let accountNumber = selectedOption.val();
+            let accountName = selectedOption.data("name");
+            let oldBalance = selectedOption.data("balance");
+            let accountOpeningDate = selectedOption.data("opening-date");
+            
+            if (accountNumber) {
+                $("#account_name").text(accountName);
+                $("#account_opening_date").text(accountOpeningDate);
+                $("#selected_account").text(accountNumber);
+                $("#old_balance").text(oldBalance);
+                $("#account_details").fadeIn();
+
+                // Check for duplicate transaction
+                fetch('<?= url('agent/check-transaction') ?>', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        account_number: accountNumber,
+                        branch_code: "<?= $branch_code ?>",
+                        agent_code: "<?= $agent_code ?>"
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        alert(`⚠️ Amount ₹${data.collected_amount} already collected for account ${accountNumber} today.`);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                $("#account_details").fadeOut();
+            }
+        });
+
+        // Submit Button
+        $("#submitBtn").click(function() {
+            let selectedAccount = $("#selected_account").text();
+            let creditAmount = $("#credit_amount").val();
+            
+            if (!selectedAccount || creditAmount <= 0) {
+                alert("⚠️ Please select an account and enter a valid amount.");
+                return;
+            }
+            
+            $("#popup_account").text(selectedAccount);
+            $("#popup_amount").text(creditAmount);
+            $("#popupOverlay").fadeIn();
+            $("#confirmationPopup").fadeIn();
+        });
+
+        // Confirm Yes
+        $("#confirmYes").click(function() {
+            $("#popupOverlay").fadeOut();
+            $("#confirmationPopup").fadeOut();
+            $("#pigmyForm").submit();
+        });
+
+        // Confirm No
+        $("#confirmNo").click(function() {
+            $("#popupOverlay").fadeOut();
+            $("#confirmationPopup").fadeOut();
+        });
+
+        // Close on overlay click
+        $("#popupOverlay").click(function() {
+            $(this).fadeOut();
+            $("#confirmationPopup").fadeOut();
+        });
+
+        // Prevent back button cache
+        window.onload = function() {
+            if (performance.navigation.type === 2) {
+                location.reload(true);
+            }
+        };
+    </script>
+</body>
+</html>
