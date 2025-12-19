@@ -14,6 +14,12 @@ define('CONFIG_PATH', BASE_PATH . '/config');
 define('STORAGE_PATH', BASE_PATH . '/storage');
 define('PUBLIC_PATH', __DIR__);
 
+// Load core helpers (needed for env() function)
+require_once BASE_PATH . '/core/helpers.php';
+
+// Load environment variables from .env file
+loadEnv(BASE_PATH . '/.env');
+
 // Load configuration
 require_once CONFIG_PATH . '/app.php';
 require_once CONFIG_PATH . '/database.php';
@@ -24,7 +30,6 @@ require_once BASE_PATH . '/core/Database.php';
 require_once BASE_PATH . '/core/Controller.php';
 require_once BASE_PATH . '/core/View.php';
 require_once BASE_PATH . '/core/Session.php';
-require_once BASE_PATH . '/core/helpers.php';
 require_once BASE_PATH . '/core/license-helper.php';
 
 // Initialize session

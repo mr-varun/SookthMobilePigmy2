@@ -16,7 +16,7 @@ desktop.ini
 
 # Logs
 *.log
-logs/
+# logs/
 
 # Storage
 storage/backups/*
@@ -27,8 +27,8 @@ storage/cache/*
 !storage/cache/.gitkeep
 
 # Composer
-/vendor/
-composer.lock
+# /vendor/
+# composer.lock
 
 # Node modules (if using npm)
 node_modules/
@@ -46,9 +46,9 @@ dist/
 *~
 
 # Database
-*.sql
-*.sqlite
-*.db
+# *.sql
+# *.sqlite
+# *.db
 
 # Sensitive files
-config/database.php
+# config/database.php
