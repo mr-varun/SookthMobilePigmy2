@@ -92,6 +92,12 @@ class BranchController extends Controller
                 VALUES (?, ?, ?, ?, ?, ?, NOW())
             ", [$branchCode, $branchName, $managerName, $managerMobile, $managerEmail, $managerPassword]);
 
+            // Insert branch settings with default values
+            Database::insert("
+                INSERT INTO branch_settings (branch_code, printer_support, text_message, whatsapp_message, created_at) 
+                VALUES (?, 0, 0, 0, NOW())
+            ", [$branchCode]);
+
             Session::flash('success', 'Branch added successfully');
             $this->redirect('admin/branches');
         }
@@ -144,8 +150,19 @@ class BranchController extends Controller
     public function delete($id)
     {
         if ($this->isPost()) {
-            Database::query("DELETE FROM branch WHERE id = ?", [$id]);
-            Session::flash('success', 'Branch deleted successfully');
+            // Get branch code before deletion
+            $branch = Database::fetchOne("SELECT branch_code FROM branch WHERE id = ?", [$id]);
+            
+            if ($branch) {
+                // Delete branch settings first
+                Database::query("DELETE FROM branch_settings WHERE branch_code = ?", [$branch['branch_code']]);
+                
+                // Delete branch
+                Database::query("DELETE FROM branch WHERE id = ?", [$id]);
+                Session::flash('success', 'Branch deleted successfully');
+            } else {
+                Session::flash('error', 'Branch not found');
+            }
         }
 
         $this->redirect('admin/branches');
