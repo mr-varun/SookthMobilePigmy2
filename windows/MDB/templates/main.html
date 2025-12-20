@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mobile Pigmy Data Transfer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-light d-flex flex-column min-vh-100">
+    <!-- Navbar with Logout - Same as original -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+        <div class="container-fluid">
+            <span class="navbar-brand fs-3 fw-bold">
+                🏦 Sookth Mobile Pigmy Banking (Model 2)
+                {% if branch_name or session.get('branch_name') %}
+                    <small class="text-muted fs-6"> - {{ branch_name or session.get('branch_name') }}</small>
+                {% endif %}
+            </span>
+            <div class="ms-auto">
+                <a href="/logout" class="btn btn-outline-danger">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container flex-grow-1 d-flex align-items-center justify-content-center py-5">
+        <div class="row w-100 justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <!-- Page Header -->
+                <div class="text-center mb-5">
+                    <h1 class="display-4 fw-bold text-primary mb-3">
+                        <i class="fas fa-exchange-alt me-3"></i>
+                        Data Transfer System
+                    </h1>
+                    <p class="lead text-muted">Secure data transfer for mobile pigmy banking operations</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row g-4">
+                    <!-- Computer to Pigmy Machine -->
+                    <div class="col-12 col-md-6">
+                        <div class="d-grid">
+                            <a href="/com-to-pig" class="btn btn-primary btn-lg p-4 rounded-3 shadow-sm border-0 text-decoration-none">
+                                <div class="d-flex flex-column align-items-center justify-content-center">
+                                    <i class="fas fa-desktop display-6 mb-3"></i>
+                                    <span class="fw-bold fs-4">Computer</span>
+                                    <i class="fas fa-arrow-right my-3 fs-2"></i>
+                                    <span class="fw-bold fs-4">Pigmy Machine</span>
+                                </div>
+                            </a>
+                        </div>
+                        <p class="text-center text-muted mt-3 small">
+                            Transfer data from computer to mobile pigmy device
+                        </p>
+                    </div>
+                    
+                    <!-- Pigmy Machine to Computer -->
+                    <div class="col-12 col-md-6">
+                        <div class="d-grid">
+                            <a href="/pig-to-com" class="btn btn-secondary btn-lg p-4 rounded-3 shadow-sm border-0 text-decoration-none">
+                                <div class="d-flex flex-column align-items-center justify-content-center">
+                                    <i class="fas fa-mobile-alt display-6 mb-3"></i>
+                                    <span class="fw-bold fs-4">Pigmy Machine</span>
+                                    <i class="fas fa-arrow-right my-3 fs-2"></i>
+                                    <span class="fw-bold fs-4">Computer</span>
+                                </div>
+                            </a>
+                        </div>
+                        <p class="text-center text-muted mt-3 small">
+                            Transfer data from mobile pigmy device to computer
+                        </p>
+                    </div>
+                </div>
+
+                <!-- System Info -->
+                <div class="text-center mt-5 pt-4">
+                    <div class="border-top pt-3">
+                        <p class="text-muted small">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Secure and encrypted data transfer system
+                        </p>
+                        <p class="text-muted small">
+                            <i class="fas fa-code-branch me-2"></i>
+                            Version {{ app_version }}
+                            <button id="checkUpdateBtn" class="btn btn-sm btn-outline-primary ms-2" onclick="checkForUpdates()">
+                                <i class="fas fa-sync-alt me-1"></i>Check for Updates
+                            </button>
+                        </p>
+                        <div id="updateStatus" class="mt-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function checkForUpdates() {
+            const btn = document.getElementById('checkUpdateBtn');
+            const statusDiv = document.getElementById('updateStatus');
+            
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Checking...';
+            statusDiv.innerHTML = '';
+            
+            fetch('/api/update/check')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        statusDiv.innerHTML = `
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Error:</strong> ${data.error}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `;
+                    } else if (data.update_available) {
+                        statusDiv.innerHTML = `
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Update Available!</strong> Version ${data.server_version} is available. 
+                                You have version ${data.current_version}.
+                                <br><button onclick="installUpdate()" class="btn btn-success btn-sm mt-2">
+                                    <i class="fas fa-download me-1"></i>Install Update Now
+                                </button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `;
+                    } else {
+                        statusDiv.innerHTML = `
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                You're using the latest version (${data.current_version}).
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-times-circle me-2"></i>
+                            Failed to check for updates: ${error.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `;
+                })
+                .finally(() => {
+                    // Re-enable button
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Check for Updates';
+                });
+        }
+        
+        function installUpdate() {
+            const statusDiv = document.getElementById('updateStatus');
+            
+            if (!confirm('The application will restart to install the update. Continue?')) {
+                return;
+            }
+            
+            statusDiv.innerHTML = `
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    Downloading and installing update... Application will restart shortly.
+                </div>
+            `;
+            
+            fetch('/api/update/install', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-success" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            ${data.message}
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-times-circle me-2"></i>
+                            Update failed: ${data.error}
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                statusDiv.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Update failed: ${error.message}
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>

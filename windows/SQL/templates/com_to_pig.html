@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Computer → Pigmy Machine</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            padding: 20px;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .monospace {
+            font-family: Consolas, monospace;
+            font-size: 13px;
+        }
+
+        #result-table {
+            max-height: 360px;
+            overflow: auto;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom mb-3">
+        <div class="container-fluid">
+            <span class="navbar-brand">🏦 Mobile Pigmy Banking
+                {% if branch_name or session.get('branch_name') %}
+                    <small class="text-muted"> - {{ branch_name or session.get('branch_name') }}</small>
+                {% endif %}
+            </span>
+            <div class="ms-auto">
+                <a href="/" class="btn btn-outline-secondary btn-sm me-2">🏠 Main Menu</a>
+                <a href="/logout" class="btn btn-outline-danger btn-sm">🚪 Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div class="mb-3">
+            <h3>🖥️ Computer → Pigmy Machine</h3>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+
+                <div id="branch-info">Loading branch...</div>
+
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <label>Pigmy Type</label>
+                        <select id="type-select" class="form-control"></select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Agent</label>
+                        <select id="agent-select" class="form-control"></select>
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button id="load-btn" class="btn btn-primary me-2" disabled>📋 Load Accounts</button>
+                        <button id="upload-btn" class="btn btn-success" disabled>⬆️ Upload</button>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <div class="progress">
+                        <div id="progress-bar" class="progress-bar" role="progressbar" style="width:0%">0%</div>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <div id="summary" class="fw-semibold">Total Accounts: 0 | Total Balance: ₹0.00</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row">
+
+            <!-- Logs -->
+            <div class="col-md-5">
+                <div class="card h-100">
+                    <div class="card-header">Process Log</div>
+                    <div class="card-body">
+                        <pre id="log" class="monospace" style="height:420px; overflow:auto;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accounts -->
+            <div class="col-md-7">
+                <div class="card h-100">
+                    <div class="card-header">Account Details</div>
+                    <div class="card-body">
+                        <div id="result-table" class="monospace"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let branch = null;
+        let accounts = [];
+
+        async function fetchInitial() {
+            const res = await fetch('/api/initial-data');
+            const data = await res.json();
+
+            if (data.error) {
+                document.getElementById('branch-info').innerText = "Error: " + data.error;
+                return;
+            }
+
+            branch = data.branch;
+            document.getElementById('branch-info').innerText = `🏦 ${branch.name} (${branch.code})`;
+
+            let typeSelect = document.getElementById('type-select');
+            typeSelect.innerHTML = '';
+
+            (data.types || []).forEach(t => {
+                let opt = document.createElement('option');
+                opt.value = t;
+                opt.text = t;
+                typeSelect.add(opt);
+            });
+
+            if (typeSelect.options.length) {
+                typeSelect.selectedIndex = 0;
+                await loadAgents();
+            }
+        }
+
+        async function loadAgents() {
+            const type = document.getElementById('type-select').value;
+            if (!type || !branch) return;
+
+            const res = await fetch(`/api/agents?type=${type}&branch=${branch.code}`);
+            const data = await res.json();
+
+            let agentSelect = document.getElementById('agent-select');
+            agentSelect.innerHTML = '';
+
+            (data.agents || []).forEach(a => {
+                let opt = document.createElement('option');
+                opt.value = a.agent_number;
+                opt.text = `${a.agent_name} (${a.agent_number})`;
+                agentSelect.add(opt);
+            });
+
+            document.getElementById('load-btn').disabled = !(agentSelect.options.length > 0);
+        }
+
+        async function loadAccounts() {
+            const type = document.getElementById('type-select').value;
+            const agent = document.getElementById('agent-select').value;
+
+            if (!type || !agent) {
+                Swal.fire("Select Required", "Please select both pigmy type and agent.", "warning");
+                return;
+            }
+
+            document.getElementById('load-btn').disabled = true;
+            log('🟢 Loading accounts...');
+            setProgress(10);
+
+            const res = await fetch('/api/load-accounts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    branch_code: branch.code,
+                    deposit_type: type,
+                    agent_number: agent
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.error) {
+                log('❌ ' + data.error);
+                setProgress(0);
+                document.getElementById('load-btn').disabled = false;
+                return;
+            }
+
+            accounts = data.results || [];
+            renderResults(accounts);
+
+            document.getElementById('summary').innerText =
+                `Total Accounts: ${accounts.length} | Total Balance: ₹${Number(data.total_balance)
+                    .toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+
+            log(`✅ Loaded ${accounts.length} accounts.`);
+            setProgress(100);
+
+            document.getElementById('upload-btn').disabled = accounts.length === 0;
+            document.getElementById('load-btn').disabled = false;
+        }
+
+        function renderResults(rows) {
+            if (!rows.length) {
+                document.getElementById('result-table').innerText = "(No accounts)";
+                return;
+            }
+
+            let html = `
+            <table class='table table-sm table-bordered'>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Account</th>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Balance</th>
+                </tr>
+            </thead><tbody>`;
+
+            rows.forEach(r => {
+                html += `<tr>
+                    <td>${r.sno}</td>
+                    <td>${r.accnum}</td>
+                    <td>${r.macnam}</td>
+                    <td>${r.mobno || 'N/A'}</td>
+                    <td>₹${Number(r.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                </tr>`;
+            });
+
+            html += "</tbody></table>";
+            document.getElementById('result-table').innerHTML = html;
+        }
+
+        async function uploadAccounts() {
+            if (!accounts.length) {
+                Swal.fire("No Accounts", "Load accounts first.", "warning");
+                return;
+            }
+
+            const agent = document.getElementById('agent-select').value;
+
+            document.getElementById('upload-btn').disabled = true;
+            log('🔍 Checking server...');
+
+            let payload = {
+                branch_code: branch.code,
+                agent_number: agent,
+
+                // 👇 Sending mobile number correctly to backend
+                accounts: accounts.map(a => ({
+                    accnum: a.accnum,
+                    macnam: a.macnam,
+                    depdat: a.depdat,
+                    balance: a.balance,
+                    mobno: a.mobno
+                }))
+            };
+
+            let response = await fetch('/api/upload-accounts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            let result = await response.json();
+
+            // ❌ Block
+            if (result.requires_action && result.type === "BLOCK") {
+                Swal.fire("Upload Blocked", result.message, "error");
+                document.getElementById('upload-btn').disabled = false;
+                return;
+            }
+
+            // ⚠ Confirm
+            if (result.requires_action && result.type === "CONFIRM") {
+                const confirmAction = await Swal.fire({
+                    icon: "warning",
+                    title: "Overwrite Accounts?",
+                    text: result.message,
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, Overwrite",
+                    cancelButtonText: "Cancel"
+                });
+
+                if (!confirmAction.isConfirmed) {
+                    Swal.fire("Cancelled", "Upload cancelled.", "info");
+                    document.getElementById('upload-btn').disabled = false;
+                    return;
+                }
+
+                // RESEND with force
+                payload.force = true;
+
+                response = await fetch('/api/upload-accounts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                result = await response.json();
+            }
+
+            // // ✔ Final Result : SUCCESS
+            if (result.success) {
+                Swal.fire("Upload Successful", result.message, "success");
+                log(`✅ ${result.message}`);
+                setProgress(100);
+            } else {
+                Swal.fire("Upload Failed", result.message || "Unknown error", "error");
+                log(`❌ ${result.message}`);
+                setProgress(0);
+            }
+
+            document.getElementById('upload-btn').disabled = false;
+        }
+
+        function log(msg) {
+            const pre = document.getElementById('log');
+            pre.innerText += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+            pre.scrollTop = pre.scrollHeight;
+        }
+
+        function setProgress(val) {
+            const bar = document.getElementById('progress-bar');
+            bar.style.width = val + '%';
+            bar.innerText = val + '%';
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchInitial();
+            document.getElementById('type-select').addEventListener('change', loadAgents);
+            document.getElementById('load-btn').addEventListener('click', loadAccounts);
+            document.getElementById('upload-btn').addEventListener('click', uploadAccounts);
+        });
+    </script>
+</body>
+</html>

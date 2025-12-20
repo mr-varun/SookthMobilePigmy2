@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branch Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .login-header h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+            display: none;
+            font-weight: 600;
+        }
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            color: white;
+            background: linear-gradient(135deg, #5568d3 0%, #6b3d8f 100%);
+        }
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .form-divider {
+            text-align: center;
+            margin-top: 20px;
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🔐 Branch Login (M2)</h1>
+            <h4 id="branch_name_header"></h4>
+            <p>Access your banking system</p>
+        </div>
+
+        <!-- Display Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Login Form -->
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="branch_code">Branch Code</label>
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="branch_code" 
+                    name="branch_code" 
+                    placeholder="Enter your branch code"
+                    value="{{ branch_code or '' }}"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input 
+                    type="password" 
+                    class="form-control" 
+                    id="password" 
+                    name="password" 
+                    placeholder="Enter your password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-login">Login</button>
+        </form>
+
+        <div class="form-divider">
+            <p>© 2025 Mobile Pigmy Banking System</p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Prefill and show branch name if available
+            var branchCode = '{{ branch_code or "" }}';
+            var branchName = '{{ branch_name or "" }}';
+            
+            if (branchCode && branchName) {
+                $('#branch_code').val(branchCode);
+                $('#branch_name_header').text(branchName).show();
+            }
+
+            // Auto-uppercase branch code
+            $('#branch_code').on('input', function() {
+                $(this).val($(this).val().toUpperCase());
+            });
+        });
+    </script>
+</body>
+</html>

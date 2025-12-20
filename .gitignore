@@ -36,7 +36,7 @@ package-lock.json
 
 # Build files
 build/
-dist/
+# dist/
 
 # Temporary files
 *.tmp
