@@ -42,7 +42,18 @@ class CustomerController extends Controller
 
         // Fetch all transactions for this customer from both tables
         $transactions = Database::fetchAll("
-            SELECT t.*, a.agent_name
+            SELECT 
+                t.id,
+                t.transaction_id,
+                t.branch_code,
+                t.agent_code,
+                t.account_number,
+                t.customer_name as account_name,
+                t.transaction_date as date,
+                t.transaction_time as time,
+                t.amount,
+                t.is_resent,
+                a.agent_name
             FROM transactions t
             LEFT JOIN agent a ON t.agent_code = a.agent_code AND t.branch_code = a.branch_code
             WHERE t.branch_code = ? AND t.agent_code = ? AND t.account_number = ?
@@ -59,7 +70,7 @@ class CustomerController extends Controller
                 bt.date,
                 bt.time,
                 bt.amount,
-                0 as status,
+                0 as is_resent,
                 bt.agent_name
             FROM backuptransaction bt
             WHERE bt.branch_code = ? AND bt.agent_code = ? AND bt.account_number = ?
