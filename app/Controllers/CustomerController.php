@@ -49,8 +49,8 @@ class CustomerController extends Controller
                 t.agent_code,
                 t.account_number,
                 t.customer_name as account_name,
-                t.transaction_date as date,
-                t.transaction_time as time,
+                t.date as date,
+                t.time as time,
                 t.amount,
                 t.is_resent,
                 a.agent_name
