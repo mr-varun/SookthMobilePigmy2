@@ -8,6 +8,12 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Load core helpers (needed for env() function)
+require_once __DIR__ . '/core/helpers.php';
+
+// Load environment variables from .env file
+loadEnv(__DIR__ . '/.env');
+
 echo "<!DOCTYPE html>
 <html>
 <head>
