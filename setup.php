@@ -55,7 +55,7 @@ echo "<h3 class='mt-4'>Directory Permissions</h3>";
 $dirs = [
     __DIR__ . '/storage' => 'Storage',
     __DIR__ . '/storage/backups' => 'Backups',
-    __DIR__ . '/public/assets' => 'Assets'
+    __DIR__ . '/assets' => 'Assets'
 ];
 
 foreach ($dirs as $dir => $name) {
@@ -130,7 +130,7 @@ if ($dbConfigExists) {
 }
 
 // .htaccess check
-$htaccess = __DIR__ . '/public/.htaccess';
+$htaccess = __DIR__ . '/.htaccess';
 $htaccessExists = file_exists($htaccess);
 echo "<div class='check " . ($htaccessExists ? 'ok' : 'fail') . "'>
     .htaccess File: " . ($htaccessExists ? 'Exists ✓' : 'Missing ✗') . "
@@ -148,9 +148,9 @@ if (function_exists('apache_get_modules')) {
 echo "<h3 class='mt-4'>Next Steps</h3>
 <ol>
     <li>Ensure all checks above pass (green)</li>
-    <li>Import your database from SMP/files/ directory</li>
-    <li>Copy images from SMP/img/ to public/assets/img/</li>
-    <li>Configure your web server to point to the 'public/' directory</li>
+    <li>Import your database using the SQL files in database/migrations/</li>
+    <li>Copy images from old SMP/img/ to assets/img/ (if migrating)</li>
+    <li>Configure your .env file with proper database credentials</li>
     <li>Access the application at your configured URL</li>
     <li><strong>Delete this setup.php file after setup is complete</strong></li>
 </ol>";
@@ -158,7 +158,7 @@ echo "<h3 class='mt-4'>Next Steps</h3>
 // Configuration info
 echo "<h3 class='mt-4'>Configuration Info</h3>
 <div class='alert alert-info'>
-    <strong>Document Root:</strong> Should point to: <code>" . __DIR__ . "/public</code><br>
+    <strong>Document Root:</strong> Should point to: <code>" . __DIR__ . "</code><br>
     <strong>Application Path:</strong> <code>" . __DIR__ . "</code><br>
     <strong>Database Config:</strong> <code>" . __DIR__ . "/config/database.php</code>
 </div>";
@@ -166,8 +166,8 @@ echo "<h3 class='mt-4'>Configuration Info</h3>
 // Quick links
 echo "<h3 class='mt-4'>Quick Access</h3>
 <div class='d-grid gap-2'>
-    <a href='public/index.php' class='btn btn-primary'>Go to Application Home</a>
-    <a href='public/index.php?url=admin/login' class='btn btn-outline-primary'>Admin Login</a>
+    <a href='index.php' class='btn btn-primary'>Go to Application Home</a>
+    <a href='index.php?url=admin/login' class='btn btn-outline-primary'>Admin Login</a>
     <a href='public/index.php?url=agent/login' class='btn btn-outline-success'>Agent Login</a>
     <a href='public/index.php?url=bank/login' class='btn btn-outline-secondary'>Bank Login</a>
 </div>";
