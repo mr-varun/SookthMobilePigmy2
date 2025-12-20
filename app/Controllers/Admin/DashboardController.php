@@ -52,7 +52,7 @@ class DashboardController extends Controller
 
     private function getTodayCollections()
     {
-        $result = Database::fetchOne("SELECT SUM(amount) as total FROM transactions WHERE DATE(transaction_date) = CURDATE()");
+        $result = Database::fetchOne("SELECT SUM(amount) as total FROM transactions WHERE DATE(date) = CURDATE()");
         return $result['total'] ?? 0;
     }
 
