@@ -50,21 +50,31 @@ foreach ($extensions as $ext) {
     </div>";
 }
 
-// Check directories
+// Check and create directories
 echo "<h3 class='mt-4'>Directory Permissions</h3>";
 $dirs = [
     __DIR__ . '/storage' => 'Storage',
     __DIR__ . '/storage/backups' => 'Backups',
+    __DIR__ . '/storage/cache' => 'Cache',
+    __DIR__ . '/storage/logs' => 'Logs',
+    __DIR__ . '/storage/uploads' => 'Uploads',
     __DIR__ . '/assets' => 'Assets'
 ];
 
 foreach ($dirs as $dir => $name) {
     $exists = is_dir($dir);
-    $writable = is_writable($dir);
+    
+    // Try to create directory if it doesn't exist
+    if (!$exists) {
+        $created = @mkdir($dir, 0755, true);
+        $exists = is_dir($dir);
+    }
+    
+    $writable = $exists && is_writable($dir);
     $status = $exists && $writable ? 'ok' : 'fail';
     echo "<div class='check $status'>
         $name Directory: " . 
-        ($exists ? ($writable ? 'Writable ✓' : 'Not writable ✗') : 'Does not exist ✗') . 
+        ($exists ? ($writable ? 'Writable ✓' : 'Not writable ✗') : 'Could not create ✗') . 
     "</div>";
 }
 
