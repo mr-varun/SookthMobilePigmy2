@@ -125,24 +125,35 @@ class Router
         }
 
         if (is_string($callback)) {
-            // Format: ControllerName@methodName
+            // Format: ControllerName@methodName or Path\\ControllerName@methodName
+            if (strpos($callback, '@') === false) {
+                throw new Exception("Invalid route callback format. Expected 'Controller@method'");
+            }
+            
             list($controller, $method) = explode('@', $callback);
             
-            // Determine controller path based on namespace
+            // Determine controller path based on directory structure
+            // Replace backslashes with forward slashes for file path
             $controllerPath = APP_PATH . '/Controllers/' . str_replace('\\', '/', $controller) . '.php';
             
             if (file_exists($controllerPath)) {
                 require_once $controllerPath;
                 
-                // Get just the class name (last part after /)
-                $className = basename($controller);
+                // Get just the class name (last part after / or \)
+                $className = basename(str_replace('\\', '/', $controller));
                 
                 if (class_exists($className)) {
                     $controllerInstance = new $className();
                     if (method_exists($controllerInstance, $method)) {
                         return call_user_func_array([$controllerInstance, $method], $params);
+                    } else {
+                        throw new Exception("Method '$method' not found in controller '$className'");
                     }
+                } else {
+                    throw new Exception("Controller class '$className' not found");
                 }
+            } else {
+                throw new Exception("Controller file not found: $controllerPath");
             }
         }
 
