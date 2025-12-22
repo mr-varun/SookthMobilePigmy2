@@ -838,6 +838,17 @@ def pig_to_com_download():
         count = 0
         total_amount = 0
 
+        # Clear existing local pig_to_com records before inserting
+        try:
+            lcur.execute("DELETE FROM pig_to_com")
+            try:
+                local.commit()
+            except Exception:
+                pass
+        except Exception:
+            # If deletion fails (e.g., table missing), continue and let inserts fail if necessary
+            pass
+
         for t in txns:
             accnum = t["accnum"]
             amount = float(t["amount"])

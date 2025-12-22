@@ -63,6 +63,7 @@
             <div id="branch-info" class="fw-bold mb-3">Loading branch...</div>
 
             <div class="row">
+
                 <div class="col-md-4">
                     <label>Select Agent</label>
                     <select id="agent-select" class="form-control"></select>
@@ -138,6 +139,7 @@
                 branch = bdata.branch;
                 document.getElementById("branch-info").innerText =
                     `🏦 ${branch.name} (${branch.code})`;
+                // types not used in this UI
             } catch (e) {
                 log("Branch load failed.");
             }
@@ -175,7 +177,7 @@
             const resp = await fetch("/api/com-to-pig/load", {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ agent_number: agent })
+                body: JSON.stringify({ branch_code: branch.code, agent_number: agent })
             });
 
             const data = await resp.json();
@@ -250,6 +252,7 @@
             setProgress(20);
 
             const payload = {
+                branch_code: branch.code,
                 agent_number: agent,
                 accounts: accounts
             };
