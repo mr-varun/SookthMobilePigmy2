@@ -6,7 +6,6 @@
     <title>Collection Success</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -275,29 +274,19 @@
             box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
         }
 
-        .btn-share-receipt {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        .btn-share-image {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
             color: white;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
         }
 
-        .btn-share-receipt:hover {
+        .btn-share-image:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
         }
 
-        /* Print Styles for Single Page Receipt */
+        /* Print Styles for Thermal Printer */
         @media print {
-            @page {
-                size: A4 portrait;
-                margin: 20mm;
-            }
-            
-            body {
-                margin: 0;
-                padding: 0;
-            }
-            
             body * {
                 visibility: hidden;
             }
@@ -310,66 +299,45 @@
                 position: absolute;
                 left: 0;
                 top: 0;
-                width: 100%;
-                max-width: 100%;
-                /* font-family: 'Arial', sans-serif; */
+                width: 80mm; /* Standard thermal printer width */
                 font-family: 'Courier New', monospace;
-                font-size: 18pt;
-                line-height: 1.5;
+                font-size: 11pt;
+                line-height: 1.4;
                 color: black;
                 background: white;
-                padding: 30px 40px;
-                box-sizing: border-box;
-                page-break-inside: avoid;
-                page-break-after: avoid;
             }
 
             .print-header {
                 text-align: center;
                 font-weight: bold;
-                font-size: 26pt;
-                margin-bottom: 25px;
-                border-bottom: 3px solid #000;
-                padding-bottom: 15px;
-                text-transform: uppercase;
-                letter-spacing: 1px;
+                font-size: 13pt;
+                margin-bottom: 10px;
+                border-bottom: 2px dashed #000;
+                padding-bottom: 10px;
             }
 
             .print-row {
                 display: flex;
                 justify-content: space-between;
-                margin: 10px 0;
-                font-size: 18pt;
-                padding: 3px 0;
-            }
-
-            .print-row span:first-child {
-                font-weight: 600;
+                margin: 5px 0;
+                font-size: 11pt;
             }
 
             .print-amount {
                 font-weight: bold;
-                font-size: 22pt;
-                border-top: 3px solid #000;
-                border-bottom: 3px solid #000;
-                padding: 18px 10px;
-                margin: 20px 0;
-                background: #f0f0f0;
-            }
-
-            .print-amount .print-row {
-                font-size: 22pt;
-                padding: 8px 10px;
-                margin: 5px 0;
+                font-size: 12pt;
+                border-top: 1px dashed #000;
+                border-bottom: 1px dashed #000;
+                padding: 8px 0;
+                margin: 10px 0;
             }
 
             .print-footer {
                 text-align: center;
-                margin-top: 25px;
-                border-top: 3px solid #000;
-                padding-top: 20px;
-                font-size: 16pt;
-                line-height: 1.4;
+                margin-top: 15px;
+                border-top: 2px dashed #000;
+                padding-top: 10px;
+                font-size: 10pt;
             }
         }
 
@@ -441,24 +409,24 @@
                 </div>
             </div>
 
-            <!-- Hidden Print Receipt (for full page print) -->
+            <!-- Hidden Print Receipt (for thermal printer) -->
             <div id="printReceipt" style="display: none;">
                 <div class="print-header">
                     <?= htmlspecialchars($branch_name ?? 'Branch') ?><br>
-                    <div style="font-size: 24pt; margin-top: 10px;">Collection Receipt</div>
+                    COLLECTION RECEIPT
                 </div>
                 
-                <div style="margin: 30px 0;">
+                <div style="margin: 15px 0;">
                     <div class="print-row">
                         <span>Agent:</span>
                         <span><?= htmlspecialchars($agent_name ?? 'N/A') ?></span>
                     </div>
                     <div class="print-row">
-                        <span>Account Number:</span>
+                        <span>Account No:</span>
                         <span><?= htmlspecialchars($account_number) ?></span>
                     </div>
                     <div class="print-row">
-                        <span>Customer Name:</span>
+                        <span>Name:</span>
                         <span><?= htmlspecialchars($account_name) ?></span>
                     </div>
                     <div class="print-row">
@@ -466,26 +434,26 @@
                         <span id="printDateTime"></span>
                     </div>
                     <div class="print-row">
-                        <span>Transaction ID:</span>
+                        <span>Trans ID:</span>
                         <span><?= htmlspecialchars($transaction_id) ?></span>
                     </div>
                 </div>
 
                 <div class="print-amount">
                     <div class="print-row">
-                        <span>Collection Amount:</span>
-                        <span>₹ <?= number_format($credit_amount, 2) ?></span>
+                        <span>Collection:</span>
+                        <span>Rs. <?= number_format($credit_amount, 2) ?></span>
                     </div>
                     <div class="print-row">
-                        <span>New Total Balance:</span>
-                        <span>₹ <?= number_format($new_balance, 2) ?></span>
+                        <span>Total Balance:</span>
+                        <span>Rs. <?= number_format($new_balance, 2) ?></span>
                     </div>
                 </div>
 
                 <div class="print-footer">
-                    <strong>Thank you for banking with us!</strong><br>
-                    <div style="margin-top: 10px;">Sookth Mobile Pigmy</div>
-                    <div style="margin-top: 5px; font-size: 14pt;"><?= date('d/m/Y h:i A') ?></div>
+                    Thank you for banking with us!<br>
+                    Sookth Mobile Pigmy<br>
+                    <?= date('d/m/Y h:i A') ?>
                 </div>
             </div>
 
@@ -494,11 +462,12 @@
             <div class="share-section">
                 <h5 class="share-title"><i class="fas fa-share-alt"></i> Share Receipt</h5>
                 <div class="share-buttons">
-                    <?php if (($printer_support ?? 0)): ?>
-                    <button onclick="shareReceipt()" class="btn-share btn-share-receipt" style="border: none; cursor: pointer;">
-                        <i class="fas fa-share-nodes"></i>
+                    <button onclick="shareReceiptImage()" class="btn-share btn-share-image" style="border: none; cursor: pointer;">
+                        <i class="fas fa-share-alt"></i>
                         <span>Share</span>
                     </button>
+                    
+                    <?php if (($printer_support ?? 0)): ?>
                     <button onclick="printReceipt()" class="btn-share btn-print" style="border: none; cursor: pointer;">
                         <i class="fas fa-print"></i>
                         <span>Print</span>
@@ -542,6 +511,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="<?= url('assets/js/security.js') ?>"></script>
     <script>
         // Display current date & time
@@ -572,43 +542,89 @@
         updateDateTime();
 
         // Share Receipt as Image Function
-        async function shareReceipt() {
+        async function shareReceiptImage() {
             try {
-                const printContent = document.getElementById('printReceipt');
-                const originalDisplay = printContent.style.display;
+                // Create a temporary container for the receipt
+                const receiptContainer = document.createElement('div');
+                receiptContainer.style.position = 'absolute';
+                receiptContainer.style.left = '-9999px';
+                receiptContainer.style.width = '80mm';
+                receiptContainer.style.background = 'white';
+                receiptContainer.style.padding = '20px';
+                receiptContainer.style.fontFamily = '\'Courier New\', monospace';
+                receiptContainer.style.fontSize = '11pt';
+                receiptContainer.style.lineHeight = '1.4';
+                receiptContainer.style.color = 'black';
                 
-                // Temporarily show the receipt for capture
-                printContent.style.display = 'block';
-                printContent.style.position = 'relative';
-                printContent.style.visibility = 'visible';
-                printContent.style.padding = '40px';
-                printContent.style.background = 'white';
-                printContent.style.width = '800px';
-                printContent.style.margin = '0 auto';
+                // Add receipt content
+                receiptContainer.innerHTML = `
+                    <div style="text-align: center; font-weight: bold; font-size: 13pt; margin-bottom: 10px; border-bottom: 2px dashed #000; padding-bottom: 10px;">
+                        <?= htmlspecialchars($branch_name ?? 'Branch') ?><br>
+                        COLLECTION RECEIPT
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Agent:</span>
+                            <span><?= htmlspecialchars($agent_name ?? 'N/A') ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Account No:</span>
+                            <span><?= htmlspecialchars($account_number) ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Name:</span>
+                            <span><?= htmlspecialchars($account_name) ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Date & Time:</span>
+                            <span>${new Date().toLocaleDateString('en-GB')} ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Trans ID:</span>
+                            <span><?= htmlspecialchars($transaction_id) ?></span>
+                        </div>
+                    </div>
+
+                    <div style="font-weight: bold; font-size: 12pt; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 8px 0; margin: 10px 0;">
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Collection:</span>
+                            <span>Rs. <?= number_format($credit_amount, 2) ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Total Balance:</span>
+                            <span>Rs. <?= number_format($new_balance, 2) ?></span>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 15px; border-top: 2px dashed #000; padding-top: 10px; font-size: 10pt;">
+                        Thank you for banking with us!<br>
+                        Sookth Mobile Pigmy<br>
+                        <?= date('d/m/Y h:i A') ?>
+                    </div>
+                `;
                 
-                // Wait a moment for styles to apply
-                await new Promise(resolve => setTimeout(resolve, 100));
+                document.body.appendChild(receiptContainer);
                 
-                // Capture the receipt as canvas
-                const canvas = await html2canvas(printContent, {
-                    scale: 2,
+                // Convert to canvas using html2canvas
+                const canvas = await html2canvas(receiptContainer, {
                     backgroundColor: '#ffffff',
+                    scale: 3, // Higher quality
                     logging: false,
-                    width: 800,
-                    windowWidth: 800
+                    width: 302, // 80mm in pixels at 96dpi
+                    windowWidth: 302
                 });
                 
-                // Hide the receipt again
-                printContent.style.display = originalDisplay;
+                // Remove temporary container
+                document.body.removeChild(receiptContainer);
                 
                 // Convert canvas to blob
                 canvas.toBlob(async (blob) => {
                     if (!blob) {
-                        alert('Failed to create image');
+                        alert('Failed to generate receipt image');
                         return;
                     }
                     
-                    // Create file from blob
                     const file = new File([blob], 'receipt.png', { type: 'image/png' });
                     
                     // Check if Web Share API is supported
@@ -617,32 +633,33 @@
                             await navigator.share({
                                 files: [file],
                                 title: 'Collection Receipt',
-                                text: 'Transaction Receipt - <?= htmlspecialchars($transaction_id) ?>'
+                                text: 'Receipt for Transaction ID: <?= htmlspecialchars($transaction_id) ?>'
                             });
                         } catch (err) {
                             if (err.name !== 'AbortError') {
-                                console.error('Share failed:', err);
-                                alert('Could not share. Please try the Print option.');
+                                console.error('Error sharing:', err);
+                                downloadImage(canvas);
                             }
                         }
                     } else {
                         // Fallback: Download the image
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'receipt_<?= htmlspecialchars($transaction_id) ?>.png';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                        alert('Receipt image downloaded. You can now print it from your gallery.');
+                        downloadImage(canvas);
                     }
-                }, 'image/png', 0.95);
+                }, 'image/png');
                 
             } catch (error) {
-                console.error('Error creating receipt image:', error);
-                alert('Failed to create shareable receipt. Please try the Print option.');
+                console.error('Error generating receipt:', error);
+                alert('Failed to generate receipt. Please try again.');
             }
+        }
+        
+        // Helper function to download image
+        function downloadImage(canvas) {
+            const link = document.createElement('a');
+            link.download = 'receipt_<?= htmlspecialchars($transaction_id) ?>.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            alert('Receipt image downloaded. You can now share or print it.');
         }
 
         // Print Receipt Function

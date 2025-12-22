@@ -182,6 +182,15 @@
             box-shadow: 0 6px 12px rgba(255, 152, 0, 0.4);
         }
 
+        .btn-share-image {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        }
+
+        .btn-share-image:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(6, 182, 212, 0.4);
+        }
+
         .btn-share i {
             font-size: 1.5rem;
         }
@@ -399,6 +408,11 @@
                             Send Receipt to Customer
                         </h5>
                         <div class="share-buttons">
+                            <button onclick="shareReceiptImage()" class="btn-share btn-share-image">
+                                <i class="fas fa-share-alt"></i>
+                                <span>Share</span>
+                            </button>
+                            
                             <?php if (($printer_support ?? 0)): ?>
                             <button onclick="printReceipt()" class="btn-share btn-print">
                                 <i class="fas fa-print"></i>
@@ -433,8 +447,130 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="<?= url('assets/js/security.js') ?>"></script>
     <script>
+        // Share Receipt as Image Function
+        async function shareReceiptImage() {
+            try {
+                // Create a temporary container for the receipt
+                const receiptContainer = document.createElement('div');
+                receiptContainer.style.position = 'absolute';
+                receiptContainer.style.left = '-9999px';
+                receiptContainer.style.width = '80mm';
+                receiptContainer.style.background = 'white';
+                receiptContainer.style.padding = '20px';
+                receiptContainer.style.fontFamily = '\'Courier New\', monospace';
+                receiptContainer.style.fontSize = '11pt';
+                receiptContainer.style.lineHeight = '1.4';
+                receiptContainer.style.color = 'black';
+                
+                // Add receipt content
+                receiptContainer.innerHTML = `
+                    <div style="text-align: center; font-weight: bold; font-size: 13pt; margin-bottom: 10px; border-bottom: 2px dashed #000; padding-bottom: 10px;">
+                        <?= htmlspecialchars($branch_name ?? 'Branch') ?><br>
+                        COLLECTION RECEIPT (RESEND)
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Agent:</span>
+                            <span><?= htmlspecialchars($agent_name ?? 'N/A') ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Account No:</span>
+                            <span><?= htmlspecialchars($account_number) ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Name:</span>
+                            <span><?= htmlspecialchars($account_name) ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Date & Time:</span>
+                            <span><?= htmlspecialchars($date_time) ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Trans ID:</span>
+                            <span><?= htmlspecialchars($transaction_id) ?></span>
+                        </div>
+                    </div>
+
+                    <div style="font-weight: bold; font-size: 12pt; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 8px 0; margin: 10px 0;">
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Collection:</span>
+                            <span>Rs. <?= number_format($amount, 2) ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Total Balance:</span>
+                            <span>Rs. <?= number_format($new_balance, 2) ?></span>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 15px; border-top: 2px dashed #000; padding-top: 10px; font-size: 10pt;">
+                        Thank you for banking with us!<br>
+                        Sookth Mobile Pigmy<br>
+                        <?= date('d/m/Y h:i A') ?>
+                    </div>
+                `;
+                
+                document.body.appendChild(receiptContainer);
+                
+                // Convert to canvas using html2canvas
+                const canvas = await html2canvas(receiptContainer, {
+                    backgroundColor: '#ffffff',
+                    scale: 3, // Higher quality
+                    logging: false,
+                    width: 302, // 80mm in pixels at 96dpi
+                    windowWidth: 302
+                });
+                
+                // Remove temporary container
+                document.body.removeChild(receiptContainer);
+                
+                // Convert canvas to blob
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        alert('Failed to generate receipt image');
+                        return;
+                    }
+                    
+                    const file = new File([blob], 'receipt.png', { type: 'image/png' });
+                    
+                    // Check if Web Share API is supported
+                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: 'Collection Receipt',
+                                text: 'Receipt for Transaction ID: <?= htmlspecialchars($transaction_id) ?>'
+                            });
+                        } catch (err) {
+                            if (err.name !== 'AbortError') {
+                                console.error('Error sharing:', err);
+                                downloadImage(canvas);
+                            }
+                        }
+                    } else {
+                        // Fallback: Download the image
+                        downloadImage(canvas);
+                    }
+                }, 'image/png');
+                
+            } catch (error) {
+                console.error('Error generating receipt:', error);
+                alert('Failed to generate receipt. Please try again.');
+            }
+        }
+        
+        // Helper function to download image
+        function downloadImage(canvas) {
+            const link = document.createElement('a');
+            link.download = 'receipt_<?= htmlspecialchars($transaction_id) ?>.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            alert('Receipt image downloaded. You can now share or print it.');
+        }
+
         function printReceipt() {
             const printContent = document.getElementById('printReceipt');
             const originalDisplay = printContent.style.display;
