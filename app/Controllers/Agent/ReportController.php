@@ -190,9 +190,8 @@ class ReportController extends Controller
             $total_transactions += $row['transaction_count'];
         }
 
-        // Load DOMPDF
-        require_once BASE_PATH . '/_/includes/dompdf/src/Autoloader.php';
-        \Dompdf\Autoloader::register();
+        // Load dependencies via Composer
+        require_once BASE_PATH . '/vendor/autoload.php';
 
         $options = new \Dompdf\Options();
         $options->set('isHtml5ParserEnabled', true);
