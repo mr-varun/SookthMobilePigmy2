@@ -15,7 +15,7 @@ import time
 
 # -------------------- VERSION CONFIGURATION -------------------- #
 # UPDATE THIS VERSION NUMBER BEFORE BUILDING NEW RELEASE
-CURRENT_VERSION = "1.2.2"
+CURRENT_VERSION = "2.0.0"
 UPDATE_SERVER_URL = "https://mobilepigmy.sookthsolutions.com/windows/MDB"
 VERSION_FILE_URL = f"{UPDATE_SERVER_URL}/version.txt"
 EXE_FILE_URL = f"{UPDATE_SERVER_URL}/dist/SMP.exe"

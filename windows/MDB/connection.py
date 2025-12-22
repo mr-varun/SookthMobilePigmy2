@@ -48,9 +48,9 @@ def remote_connection():
     try:
         conn = mysql.connector.connect(
             host="srv1749.hstgr.io",
-            user="u936458195_mobile_pigmy_2",
+            user="u936458195_mobile_pigmy",
             password="P4c|5LMb?CE",
-            database="u936458195_mobile_pigmy_2",
+            database="u936458195_mobile_pigmy",
             port=3306
         )
         log_error("Remote MySQL DB Connection: SUCCESS")
