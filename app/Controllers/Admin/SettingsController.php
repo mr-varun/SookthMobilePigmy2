@@ -31,14 +31,15 @@ class SettingsController extends Controller
         if (!$settings) {
             // Create default settings
             Database::insert(
-                "INSERT INTO branch_settings (branch_code, printer_support, text_message, whatsapp_message) VALUES (?, 0, 0, 0)",
+                "INSERT INTO branch_settings (branch_code, printer_support, text_message, whatsapp_message, share_support) VALUES (?, 0, 0, 0, 0)",
                 [$branchCode]
             );
             $settings = [
                 'branch_code' => $branchCode,
                 'printer_support' => 0,
                 'text_message' => 0,
-                'whatsapp_message' => 0
+                'whatsapp_message' => 0,
+                'share_support' => 0
             ];
         }
 
@@ -65,7 +66,7 @@ class SettingsController extends Controller
         }
 
         // Validate setting name
-        $allowedSettings = ['printer_support', 'text_message', 'whatsapp_message'];
+        $allowedSettings = ['printer_support', 'text_message', 'whatsapp_message', 'share_support'];
         if (!in_array($setting, $allowedSettings)) {
             echo json_encode(['success' => false, 'message' => 'Invalid setting']);
             exit;

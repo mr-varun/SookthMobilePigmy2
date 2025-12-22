@@ -268,6 +268,22 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="d-flex justify-content-between align-items-center p-3" style="background: white; border-radius: 10px;">
+                                    <div>
+                                        <h6 class="mb-0"><i class="bi bi-share-alt me-2"></i>Share Feature</h6>
+                                        <small class="text-muted">Share receipt as image</small>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input setting-toggle" 
+                                               type="checkbox" 
+                                               id="shareSupport" 
+                                               data-setting="share_support"
+                                               style="width: 50px; height: 25px; cursor: pointer;">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -341,6 +357,7 @@
                         document.getElementById('printerSupport').checked = data.settings.printer_support == 1;
                         document.getElementById('textMessage').checked = data.settings.text_message == 1;
                         document.getElementById('whatsappMessage').checked = data.settings.whatsapp_message == 1;
+                        document.getElementById('shareSupport').checked = data.settings.share_support == 1;
                         
                         settingsOptions.style.display = 'block';
                     } else {

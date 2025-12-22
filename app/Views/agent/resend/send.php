@@ -401,17 +401,19 @@
                 </div>
 
                 <!-- Share Buttons -->
-                <?php if (($text_message ?? 0) || ($whatsapp_message ?? 0) || ($printer_support ?? 0)): ?>
+                <?php if (($text_message ?? 0) || ($whatsapp_message ?? 0) || ($printer_support ?? 0) || ($share_support ?? 0)): ?>
                     <div class="share-section">
                         <h5 class="share-title">
                             <i class="fas fa-paper-plane"></i>
                             Send Receipt to Customer
                         </h5>
                         <div class="share-buttons">
+                            <?php if (($share_support ?? 0)): ?>
                             <button onclick="shareReceiptImage()" class="btn-share btn-share-image">
                                 <i class="fas fa-share-alt"></i>
                                 <span>Share</span>
                             </button>
+                            <?php endif; ?>
                             
                             <?php if (($printer_support ?? 0)): ?>
                             <button onclick="printReceipt()" class="btn-share btn-print">

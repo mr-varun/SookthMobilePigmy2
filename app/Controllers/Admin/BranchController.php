@@ -94,8 +94,8 @@ class BranchController extends Controller
 
             // Insert branch settings with default values
             Database::insert("
-                INSERT INTO branch_settings (branch_code, printer_support, text_message, whatsapp_message, created_at) 
-                VALUES (?, 0, 0, 0, NOW())
+                INSERT INTO branch_settings (branch_code, printer_support, text_message, whatsapp_message, share_support, created_at) 
+                VALUES (?, 0, 0, 0, 0, NOW())
             ", [$branchCode]);
 
             Session::flash('success', 'Branch added successfully');

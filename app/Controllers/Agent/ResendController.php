@@ -88,7 +88,7 @@ class ResendController extends Controller
         
         // Get branch settings
         $branchSettings = Database::fetchOne(
-            "SELECT printer_support, text_message, whatsapp_message FROM branch_settings WHERE branch_code = ?",
+            "SELECT printer_support, text_message, whatsapp_message, share_support FROM branch_settings WHERE branch_code = ?",
             [$branch_code]
         );
         
@@ -96,7 +96,8 @@ class ResendController extends Controller
             $branchSettings = [
                 'printer_support' => 0,
                 'text_message' => 0,
-                'whatsapp_message' => 0
+                'whatsapp_message' => 0,
+                'share_support' => 0
             ];
         }
 
@@ -147,7 +148,8 @@ class ResendController extends Controller
             'message' => $message,
             'printer_support' => $branchSettings['printer_support'],
             'text_message' => $branchSettings['text_message'],
-            'whatsapp_message' => $branchSettings['whatsapp_message']
+            'whatsapp_message' => $branchSettings['whatsapp_message'],
+            'share_support' => $branchSettings['share_support']
         ];
 
         echo $this->view('agent.resend.send', $data);

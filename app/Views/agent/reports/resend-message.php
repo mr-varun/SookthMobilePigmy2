@@ -429,13 +429,20 @@
                     </div>
 
                     <!-- Share Buttons -->
-                    <?php if (($text_message ?? 0) || ($whatsapp_message ?? 0) || ($printer_support ?? 0)): ?>
+                    <?php if (($text_message ?? 0) || ($whatsapp_message ?? 0) || ($printer_support ?? 0) || ($share_support ?? 0)): ?>
                         <div class="share-section">
                             <h5 class="share-title">
                                 <i class="fas fa-paper-plane"></i>
                                 Send Receipt to Customer
                             </h5>
                             <div class="share-buttons">
+                                <?php if (($share_support ?? 0)): ?>
+                                <button onclick="shareReceiptImage()" class="btn-share btn-share-image" style="border: none; cursor: pointer;">
+                                    <i class="fas fa-share-alt"></i>
+                                    <span>Share</span>
+                                </button>
+                                <?php endif; ?>
+                                
                                 <?php if (($printer_support ?? 0)): ?>
                                 <button onclick="printReceipt()" class="btn-share btn-print" style="border: none; cursor: pointer;">
                                     <i class="fas fa-print"></i>
@@ -471,6 +478,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="<?= url('assets/js/security.js') ?>"></script>
     <script>
         // Print Receipt Function
@@ -484,6 +492,83 @@
             setTimeout(() => {
                 printContent.style.display = originalDisplay;
             }, 500);
+        }
+
+        // Share Receipt as Image Function
+        async function shareReceiptImage() {
+            try {
+                // Create a temporary container for the receipt
+                const receiptContainer = document.createElement('div');
+                receiptContainer.style.position = 'absolute';
+                receiptContainer.style.left = '-9999px';
+                receiptContainer.style.width = '80mm';
+                receiptContainer.style.background = 'white';
+                receiptContainer.style.padding = '20px';
+                receiptContainer.style.fontFamily = '\'Courier New\', monospace';
+                receiptContainer.style.fontSize = '11pt';
+                receiptContainer.style.lineHeight = '1.4';
+                receiptContainer.style.color = 'black';
+                
+                // Get the print receipt content
+                const printReceipt = document.getElementById('printReceipt');
+                receiptContainer.innerHTML = printReceipt.innerHTML;
+                
+                document.body.appendChild(receiptContainer);
+                
+                // Convert to canvas using html2canvas
+                const canvas = await html2canvas(receiptContainer, {
+                    backgroundColor: '#ffffff',
+                    scale: 3,
+                    logging: false,
+                    width: 302,
+                    windowWidth: 302
+                });
+                
+                // Remove temporary container
+                document.body.removeChild(receiptContainer);
+                
+                // Convert canvas to blob
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        alert('Failed to generate receipt image');
+                        return;
+                    }
+                    
+                    const file = new File([blob], 'receipt.png', { type: 'image/png' });
+                    
+                    // Check if Web Share API is supported
+                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: 'Collection Receipt',
+                                text: 'Receipt for Transaction ID: <?= htmlspecialchars($transaction_id) ?>'
+                            });
+                        } catch (err) {
+                            if (err.name !== 'AbortError') {
+                                console.error('Error sharing:', err);
+                                downloadImage(canvas);
+                            }
+                        }
+                    } else {
+                        // Fallback: Download the image
+                        downloadImage(canvas);
+                    }
+                }, 'image/png');
+                
+            } catch (error) {
+                console.error('Error generating receipt:', error);
+                alert('Failed to generate receipt. Please try again.');
+            }
+        }
+        
+        // Helper function to download image
+        function downloadImage(canvas) {
+            const link = document.createElement('a');
+            link.download = 'receipt_<?= htmlspecialchars($transaction_id) ?>.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            alert('Receipt image downloaded. You can now share or print it.');
         }
     </script>
 </body>

@@ -151,6 +151,7 @@ CREATE TABLE IF NOT EXISTS `branch_settings` (
   `printer_support` tinyint(1) NOT NULL DEFAULT '0',
   `text_message` tinyint(1) NOT NULL DEFAULT '0',
   `whatsapp_message` tinyint(1) NOT NULL DEFAULT '0',
+  `share_support` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

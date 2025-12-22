@@ -458,14 +458,15 @@
             </div>
 
             <!-- Share via SMS/WhatsApp/Print -->
-            <?php if (($text_message ?? 0) || ($whatsapp_message ?? 0) || ($printer_support ?? 0)): ?>
-            <div class="share-section">
+            <?php if (($text_message ?? 0) || ($whatsapp_message ?? 0) || ($printer_support ?? 0) || ($share_support ?? 0)): ?>\n            <div class="share-section">
                 <h5 class="share-title"><i class="fas fa-share-alt"></i> Share Receipt</h5>
                 <div class="share-buttons">
+                    <?php if (($share_support ?? 0)): ?>
                     <button onclick="shareReceiptImage()" class="btn-share btn-share-image" style="border: none; cursor: pointer;">
                         <i class="fas fa-share-alt"></i>
                         <span>Share</span>
                     </button>
+                    <?php endif; ?>
                     
                     <?php if (($printer_support ?? 0)): ?>
                     <button onclick="printReceipt()" class="btn-share btn-print" style="border: none; cursor: pointer;">
