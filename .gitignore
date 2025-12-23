@@ -26,17 +26,9 @@ storage/uploads/*
 storage/cache/*
 !storage/cache/.gitkeep
 
-# Composer
-# /vendor/
-# composer.lock
-
 # Node modules (if using npm)
 node_modules/
 package-lock.json
-
-# Build files
-build/
-# dist/
 
 # Temporary files
 *.tmp
@@ -45,10 +37,14 @@ build/
 *.swo
 *~
 
-# Database
-# *.sql
-# *.sqlite
-# *.db
+# Python
+/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+*.egg-info/
 
-# Sensitive files
-# config/database.php
+# Build files
+build/
+# dist/
